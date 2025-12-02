@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: handson-frontend
+        image: frontend
         imagePullPolicy: Never
         resources:
           limits:
