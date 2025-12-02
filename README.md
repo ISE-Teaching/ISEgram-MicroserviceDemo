@@ -37,3 +37,9 @@ locust -H http://localhost:17000
   * Add more services
   * Sidecars
   * Instrumentation
+
+## GRPC
+
+ * https://grpc.io/docs/what-is-grpc/introduction/
+ * https://grpc.io/docs/languages/python/basics/
+

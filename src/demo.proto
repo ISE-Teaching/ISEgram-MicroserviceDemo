@@ -1,0 +1,15 @@
+package isegram;
+
+
+service PostsService {
+  // Sends a greeting
+  rpc GetProduct (PostsRequest) returns (PostsReply) {}
+}
+
+
+message PostsRequest {
+}
+
+message PostsReply {
+  repeated string name = 1;
+}
