@@ -1,27 +1,28 @@
-import requests
-import os
-import random
-from faker import Faker
-from flask import Flask, jsonify
-app = Flask(__name__)
-port = int(os.environ.get('PORT', 80))
+import grpc
+import logging
+from concurrent import futures
 
-fake = Faker()
+import posts_pb2    
+import posts_pb2_grpc
 
-def fake_post():
-    return {
-        "id": random.randint(1,100_000),
-        "user_id": random.randint(1,3),
-        "text": fake.text(),
-    }
+from posts import fake_post
 
-@app.route("/posts/")
-def posts():
-    num_posts = 100
-    posts = [fake_post() for _ in range(num_posts)]
-
-    return posts
+class PostsServiceServicer(posts_pb2_grpc.PostsServiceServicer):
+    
+    def GetPosts(self, request, context):
+        num_posts = 100
+        posts = [fake_post() for _ in range(num_posts)]
+        posts_messages = [posts_pb2.Post(id=post["id"], user_id=post["user_id"], text=post["text"]) for post in posts]
+        return posts_pb2.PostsReply(posts=posts_messages)
 
 
-if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=port)
+logging.basicConfig()
+print("trying to start server...")
+
+# https://grpc.io/docs/languages/python/basics/
+server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+posts_pb2_grpc.add_PostsServiceServicer_to_server(PostsServiceServicer(), server)
+server.add_insecure_port('[::]:50051')
+server.start()
+print("gRPC server for PostsService started on port 50051")
+server.wait_for_termination()

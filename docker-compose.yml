@@ -2,20 +2,17 @@ services:
   frontend:
     build: src/frontend
     ports:
-      - "17001:80"
+      - "17001:80" # main http frontend port
   users:
     build: src/users
     expose:
-      - "80"
+      - "80" # http server for REST --
     ports:
-      - "17002:80"
+      - "17002:80" # only forward for debugging
   posts:
     build: src/posts
     expose: 
-     - "80"
+     - "50551" # grpc server
     ports:
-     - "17003:80"
+      - "17051:50051"
 
-    # https://github.com/wolfkarl/ise-msa-demo/
-
-    # docker compose up

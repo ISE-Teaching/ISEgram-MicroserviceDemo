@@ -1,11 +1,15 @@
-FROM python:3.12
+FROM python:3.12-slim-trixie
 
 WORKDIR /usr/src/app
 
-RUN pip install pipenv
-COPY Pipfile ./
-RUN pipenv install
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+COPY pyproject.toml .
+RUN uv sync
+
+# RUN pip install pipenv
+# COPY Pipfile ./
+# RUN pipenv install
 
 COPY . .
 
-CMD [ "pipenv", "run", "python", "./main.py" ]
+CMD [ "uv", "run", "main.py" ]

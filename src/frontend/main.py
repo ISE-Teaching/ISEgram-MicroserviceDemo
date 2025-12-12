@@ -4,15 +4,26 @@ import json
 import random
 import logging
 import pathlib
+
+import grpc
+import posts_pb2
+import posts_pb2_grpc
+
 from flask import Flask, jsonify, render_template
+
+
 app = Flask(__name__)
 port = int(os.environ.get('PORT', 80))
 
-posts_url = "http://posts"
+posts_grpc_url = "posts:50051"
 users_url = "http://users"
 
 service_id = random.randrange(1, 100000)    
-pod = pathlib.Path("/etc/hostname").read_text()
+pod = ""
+try:
+    pod = pathlib.Path("/etc/hostname").read_text()
+except:
+    pod = "unknown"
 
 def get_users():
     users = None
@@ -25,11 +36,13 @@ def get_users():
     return users
 
 def get_posts():
-    posts = {}
+    posts = []
     try:
-        posts_json = requests.get(f"{posts_url}/posts")
-        posts = json.loads(posts_json.text)
-    except requests.exceptions.ConnectionError as e:
+        channel = grpc.insecure_channel(posts_grpc_url)
+        stub = posts_pb2_grpc.PostsServiceStub(channel)
+        response = stub.GetPosts(posts_pb2.PostsRequest())
+        posts = response.posts
+    except grpc.RpcError as e:
         logging.warning("error accessing posts aah")
         logging.warning(e)
     return posts
@@ -37,12 +50,13 @@ def get_posts():
 @app.route("/")
 def home():
     posts = get_posts()
-
     users = get_users()
 
     if not users:
         return "cannot access users service 😢"
 
+    # convert posts from protobuf objects to dicts
+    posts = [{"user_id": post.user_id, "id": post.id, "text": post.text} for post in posts]
 
     for post in posts:
         post['username'] = "".join([u['username'] for u in users if u['id'] == post['user_id']])

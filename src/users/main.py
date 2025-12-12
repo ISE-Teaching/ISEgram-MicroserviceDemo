@@ -1,4 +1,3 @@
-import requests
 import os
 from flask import Flask, jsonify
 
