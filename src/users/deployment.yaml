@@ -30,6 +30,7 @@ spec:
       containers:
       - name: users
         image: users
+        imagePullPolicy: Never
         resources:
           limits:
             memory: 256Mi

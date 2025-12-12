@@ -30,6 +30,7 @@ spec:
       containers:
       - name: posts
         image: posts
+        imagePullPolicy: Never
         resources:
           limits:
             memory: 256Mi
